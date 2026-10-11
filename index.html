@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Letterboxd Plus</title>
+<style>
+:root{--bg:#14181c;--s1:#1b2229;--s2:#2c3440;--tx:#e8eef3;--mu:#9ab;--g:#00e054;--o:#ff8000;--b:#40bcf4}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#1d3a2b 0,transparent 55%),radial-gradient(circle at 90% 100%,#2a1d12 0,transparent 40%),var(--bg);background-attachment:fixed;color:var(--tx);font:16px/1.5 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+a{color:var(--b)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em}
+.logo .d{display:flex}.logo .d i{width:.75em;height:.75em;border-radius:50%;margin-left:-.18em;mix-blend-mode:screen}
+.logo .d i:nth-child(1){background:var(--o);margin:0}.logo .d i:nth-child(2){background:var(--g)}.logo .d i:nth-child(3){background:var(--b)}
+.logo b{color:var(--g)}
+button,.btn{cursor:pointer;border:0;border-radius:10px;padding:12px 20px;font-weight:700;font-size:.95rem;font-family:inherit;transition:.2s;text-decoration:none;display:inline-block;color:var(--tx);background:var(--s2)}
+button:hover,.btn:hover{transform:translateY(-2px);filter:brightness(1.15)}
+.pri{background:var(--g);color:#04170b}
+input,select{background:#0d1114;border:1px solid var(--s2);color:var(--tx);border-radius:10px;padding:11px 14px;font-size:1rem;outline:0;font-family:inherit}
+input:focus,select:focus{border-color:var(--g)}
+.note{color:var(--mu);font-size:.88rem}
+#login{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+#login .logo{font-size:clamp(2.4rem,9vw,4.4rem)}
+#login p{color:var(--mu);max-width:460px}
+.big{font-size:1.15rem;padding:16px 34px;box-shadow:0 0 40px rgba(0,224,84,.25)}
+header{position:sticky;top:0;z-index:5;background:rgba(20,24,28,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--s2);padding:12px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+header .logo{font-size:1.3rem}header .sp{flex:1}
+header button{padding:8px 14px}
+#count{color:var(--mu)}#count b{color:var(--g);font-size:1.1rem}
+.hero{text-align:center;padding:34px 20px 10px}
+#rand{display:inline-flex;align-items:center;gap:12px;height:58px;padding:0 34px 0 28px;border-radius:14px;font-size:1.05rem;font-weight:700;letter-spacing:.01em;color:#04170b;background:linear-gradient(180deg,#22f070 0%,#00d048 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 2px rgba(0,0,0,.4),0 10px 28px -6px rgba(0,224,84,.35);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+#rand:hover{transform:translateY(-2px);filter:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 2px rgba(0,0,0,.4),0 14px 34px -6px rgba(0,224,84,.5)}
+#rand:active{transform:translateY(0);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 6px 16px -6px rgba(0,224,84,.4)}
+#rand:focus-visible{outline:2px solid #fff;outline-offset:3px}
+#rand svg{width:24px;height:24px;flex:none;transition:transform .35s ease}#rand:hover svg{transform:rotate(90deg)}
+.hint{margin:12px 0 0;color:var(--mu);font-size:.85rem}
+.tools{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:18px 20px}
+.tools input{width:min(320px,100%)}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px;max-width:1300px;margin:0 auto;padding:10px 20px 70px}
+.card{display:block;text-decoration:none;color:var(--tx);border-radius:10px;transition:.25s;content-visibility:auto;contain-intrinsic-size:auto 280px}
+.card:hover{transform:translateY(-6px)}
+.pw{position:relative;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:var(--s1);border:1px solid var(--s2);transition:.25s}
+.card:hover .pw{border-color:var(--g);box-shadow:0 12px 30px rgba(0,224,84,.2)}
+.pw img{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s}
+.pw img.ok{opacity:1}
+.ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;color:var(--mu);font-weight:700;background:linear-gradient(135deg,var(--s1),var(--s2))}
+.pw img.ok~.ph{display:none}
+.ph{flex-direction:column;gap:6px}
+.pw.ld::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.09) 50%,transparent 70%);background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{from{background-position:200% 0}to{background-position:-200% 0}}
+.pw.bad .ph::before{content:"🎞";font-size:1.6rem;opacity:.7}
+.pw.bad .ph::after{content:attr(data-why);font-size:.7rem;font-weight:400;opacity:.8}
+.envb{background:#3a2410;border-bottom:2px solid var(--o);color:#ffd9b0;padding:12px 20px;font-size:.9rem;line-height:1.5;position:relative;z-index:30}.envb code{background:rgba(0,0,0,.35);padding:1px 6px;border-radius:5px}
+.authbox{width:min(380px,100%);display:flex;flex-direction:column;gap:12px;margin-top:20px;text-align:left}
+.authbox input{width:100%}.tabs{display:flex;gap:6px}.tabs button{flex:1;background:var(--s1)}.tabs .on{background:var(--s2);box-shadow:inset 0 -2px var(--g)}
+.authbox .big{width:100%;font-size:1rem;padding:14px}.authbox a{font-size:.85rem;text-align:center}
+.chip{background:var(--s1);border:1px solid var(--s2);color:var(--mu);font-size:.82rem;font-weight:500;padding:7px 12px;border-radius:99px;max-width:min(46vw,420px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip.ok{border-color:rgba(0,224,84,.5);color:#bff5d0}.chip.bad{border-color:rgba(255,80,60,.5);color:#ffb4a8}
+#empty{background:rgba(0,224,84,.07);border-color:rgba(0,224,84,.35);color:var(--tx);text-align:center;margin:10px auto 0;max-width:640px}
+#rand:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:grayscale(.4)}
+.keybar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;margin:14px auto 0;max-width:760px;color:var(--mu);font-size:.88rem}.keybar input{flex:1;min-width:200px;padding:8px 12px}.keybar button{padding:9px 16px}
+#diag{white-space:pre-wrap;background:#0d1114;border:1px solid var(--s2);border-radius:10px;padding:10px;font-size:.78rem;color:var(--mu);margin-top:8px;max-height:220px;overflow:auto}
+.errb{margin:12px auto 0;max-width:560px;background:rgba(255,80,60,.1);border:1px solid rgba(255,80,60,.4);color:#ffb4a8;border-radius:12px;padding:10px 14px;font-size:.9rem}
+.ci{padding:8px 2px 0;font-size:.85rem;line-height:1.3}.ci b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci span{color:var(--mu);margin-right:6px}.st{color:var(--g);letter-spacing:1px}.tm{color:var(--b);font-size:.78rem}
+.ov{position:fixed;inset:0;background:rgba(5,8,10,.88);backdrop-filter:blur(6px);z-index:20;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto;animation:fi .25s}
+@keyframes fi{from{opacity:0}}
+.box{background:var(--s1);border:1px solid var(--s2);border-radius:18px;padding:26px;max-width:560px;width:100%;position:relative;margin:auto}
+.box h3{margin:0 0 8px;font-size:1.4rem}.box ol{padding-left:20px;color:var(--mu)}.box li{margin:8px 0}.box li b{color:var(--tx)}
+.x{position:absolute;top:10px;right:12px;background:none;padding:6px 10px;font-size:1.3rem;z-index:3}
+.drop{display:block;margin-top:14px;border:2px dashed var(--s2);border-radius:12px;padding:20px;text-align:center;color:var(--mu);cursor:pointer;transition:.2s}
+.drop:hover,.drop.on{border-color:var(--g);color:var(--tx);background:rgba(0,224,84,.05)}
+.err{margin-top:14px;background:rgba(255,80,60,.1);border:1px solid rgba(255,80,60,.4);color:#ffb4a8;border-radius:12px;padding:12px 14px}
+.lim{background:rgba(255,128,0,.08);border:1px solid rgba(255,128,0,.35);border-radius:12px;padding:12px 14px;font-size:.9rem;color:#ffd2a6;margin:12px 0}
+.res{max-width:820px;display:grid;grid-template-columns:280px 1fr;gap:28px;padding:28px}
+.res .pw{box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.rev{animation:rv .7s cubic-bezier(.2,.9,.2,1)}
+@keyframes rv{from{opacity:0;transform:scale(.8) rotate(-4deg)}}
+.res h2{margin:0;font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.15}.res h2 span{color:var(--mu);font-weight:400}
+.res .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.shuf .pw{animation:fl .09s infinite alternate}@keyframes fl{to{transform:scale(.97);filter:brightness(.7)}}
+.rating{margin:14px 0;font-size:1.3rem}
+.spin{width:54px;height:54px;border-radius:50%;border:6px solid var(--s2);border-top-color:var(--g);border-right-color:var(--o);animation:sp .9s linear infinite;margin:0 auto 14px}
+@keyframes sp{to{transform:rotate(360deg)}}
+#load{text-align:center;padding:80px 20px;color:var(--mu)}
+@media(max-width:640px){.res{grid-template-columns:1fr}.res .pw{max-width:230px;margin:0 auto}#grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px}}
+</style></head><body>
+<div id="envb" class="envb" hidden><b>&#9888; Posters can't load in this view.</b> This page can't reach TMDB (themoviedb.org): you may be offline, using an ad-blocker, or viewing the site inside a restricted preview. Your Watchlist and the random picker still work. Open the site in a normal browser tab to see posters. <span id="envd" class="note"></span> <button id="recheck" style="padding:6px 12px">Re-check</button></div>
+
+<section id="login">
+ <div class="logo"><span class="d"><i></i><i></i><i></i></span><span>Letterboxd <b>Plus</b></span></div>
+ <p>Can't decide what to watch? Let Letterboxd Plus choose from your own Watchlist.</p>
+ <form id="userForm" class="authbox">
+  <input id="user" type="text" placeholder="Your Letterboxd username (e.g. D4OUD)" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Letterboxd username" maxlength="60" required>
+  <button class="pri big" id="goBtn">Show Watchlist</button>
+  <div id="userMsg" class="note" role="alert"></div>
+  <button type="button" id="rssBtn" hidden>Show their recent diary (RSS) instead</button>
+ </form>
+ <p class="note">Reads the public page at letterboxd.com/&lt;username&gt;/watchlist. No account, password or export needed.</p>
+</section>
+
+<section id="app" hidden>
+ <header><div class="logo"><span class="d"><i></i><i></i><i></i></span><span>Letterboxd <b>Plus</b></span></div><span class="sp"></span><span id="who" class="chip ok" hidden></span><span id="count"></span><button id="settings">⚙ Settings</button><button id="out">Change user</button></header>
+ <div id="load"><div class="spin"></div><div id="loadTxt">Reading the watchlist…</div></div>
+ <div id="main" hidden>
+  <div class="hero"><button id="rand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.1" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.1" fill="currentColor"/><circle cx="12" cy="12" r="1.1" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.1" fill="currentColor"/></svg><span>Pick a random movie</span></button><p class="hint">Chosen at random from your Watchlist</p><div class="keybar" id="nokey" hidden><span>Posters come from TMDB. Paste your free TMDB key to load them:</span><input id="key2" type="password" placeholder="TMDB API key or v4 token"><button class="pri" id="save2">Load posters</button></div><div class="errb" id="tmerr" hidden></div></div>
+  <div class="tools"><input id="q" type="search" placeholder="Search your watchlist"><select id="sort"><option value="new">Letterboxd order</option><option value="old">Reverse order</option><option value="az">Title A–Z</option><option value="yr">Year (newest)</option></select></div>
+  <div id="empty" class="errb" hidden></div><div id="modeNote" class="errb" hidden></div><div id="grid"></div>
+ </div>
+</section>
+
+<div class="ov" id="connect" hidden><div class="box">
+ <button class="x" data-close>×</button>
+ <h3>Settings</h3>
+ <p class="note" style="margin-top:16px"><b>Posters &amp; ratings (recommended):</b> Letterboxd pages carry no images. Paste a free <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">TMDB API key (v3)</a> to load posters and TMDB ratings. Stored in this browser only.</p>
+ <input id="key" type="password" placeholder="TMDB API key (v3) or Read Access Token (v4)" style="width:100%">
+ <button id="diagBtn" style="margin-top:12px;width:100%">🔧 Test poster loading</button><div id="diag" hidden></div>
+ <details style="margin-top:12px" class="note"><summary>Advanced: keep your TMDB key off this page</summary><p>Point this at your own server or Cloudflare Worker that adds your key to TMDB requests (e.g. <code>https://tmdb.example.workers.dev</code>, forwarding <code>/search/movie</code>). Then no key is stored in the browser at all.</p><input id="tmproxy" type="text" placeholder="https://your-tmdb-proxy.example (optional)" style="width:100%"></details>
+ <details style="margin-top:12px" class="note"><summary>Advanced: use a different proxy</summary><p>The site reads Letterboxd through the built-in Cloudflare Worker proxy and falls back to free public proxies. To use another proxy instead, enter its URL here (use <code>{url}</code> as the placeholder).</p><input id="proxy" type="text" placeholder="Leave empty to use the built-in Worker proxy" style="width:100%"></details>
+</div></div>
+
+<div class="ov" id="result" hidden><div class="box res"><button class="x" data-close>×</button><div id="resBody" style="display:contents"></div></div></div>
+
+<script id="core">
+function rnd(n){const m=Math.floor(4294967296/n)*n;let x;do{x=crypto.getRandomValues(new Uint32Array(1))[0]}while(x>=m);return x%n}
+function makeBag(n,last){const a=Array.from({length:n},(_,i)=>i);
+ for(let i=n-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}
+ if(n>1&&a[a.length-1]===last)a.unshift(a.pop());return a}
+function stars(r){let s="";for(let i=1;i<=5;i++)s+=r>=i-.25?"★":(r>=i-.75?"½":"");return s}
+</script>
+
+<script>
+const DEFAULT_TMDB_KEY="4c03b6626f9fe85621d3b51826c1d55d"; // your TMDB v3 key; a key typed in Settings overrides it
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";localStorage.setItem(k,v)}catch(e){return ""}};
+const ss=(k,v)=>{try{if(v===undefined)return sessionStorage.getItem(k);v===null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v)}catch(e){return null}};
+const S={films:[],bag:[],last:null};
+const mk=f=>f.uri||f.title+f.year;
+let cache={};try{cache=JSON.parse(ls("lp_meta2")||"{}")}catch(e){}
+let saveT;const saveCache=()=>{clearTimeout(saveT);saveT=setTimeout(()=>{try{ls("lp_meta2",JSON.stringify(cache,(k,v)=>k==="d"?undefined:v))}catch(e){}},800)};
+$("key").value=ls("lp_key")||DEFAULT_TMDB_KEY;$("key2").value=$("key").value;$("proxy").value=ls("lp_proxy");$("tmproxy").value=ls("lp_tmproxy");
+function getKey(){return $("key").value.replace(/^["'\s]+|["'\s]+$/g,"")}
+let rfT;function refreshPosters(){clearTimeout(rfT);rfT=setTimeout(()=>{TM.bad=false;TM.net=0;TM.fail={};$("tmerr").hidden=true;$("nokey").hidden=tmOn();if(ENV.blocked===true)probeNet();if(S.films.length)renderGrid()},500)}
+$("key").oninput=e=>{ls("lp_key",getKey());$("key2").value=e.target.value;refreshPosters()};
+$("key2").oninput=e=>{$("key").value=e.target.value;ls("lp_key",getKey())};
+$("save2").onclick=()=>{$("key").value=$("key2").value;ls("lp_key",getKey());refreshPosters()};
+$("proxy").oninput=e=>ls("lp_proxy",e.target.value.trim());
+$("tmproxy").oninput=e=>{ls("lp_tmproxy",e.target.value.trim());refreshPosters()};
+
+function pool(n){let a=0;const q=[];function run(){while(a<n&&q.length){const[f,ok,no]=q.shift();a++;f().then(ok,no).finally(()=>{a--;run()})}}return f=>new Promise((ok,no)=>{q.push([f,ok,no]);run()})}
+const lim=pool(4),limLB=pool(2);
+const inflight={},TM={bad:false,net:0,fail:{}};
+const tmOn=()=>!!(getKey()||$("tmproxy").value.trim());
+const ENV={blocked:null,csp:""};
+const isBlocked=e=>/Failed to fetch|NetworkError|Load failed/i.test(e&&e.message||"");
+function setBlocked(v,why){ENV.blocked=v;if(why)ENV.csp=why;$("envb").hidden=!v;$("envd").textContent=v&&ENV.csp?"(Blocked by: "+ENV.csp+")":""}
+function tmFail(e){
+ if(e.message==="auth"){TM.bad=true;tmError("TMDB rejected your key (HTTP 401). Use the v3 API Key or the v4 Read Access Token from themoviedb.org/settings/api.")}
+ else if(isBlocked(e)){setBlocked(true);console.warn("[poster] TMDB request blocked:",e.message)}
+ else tmError("TMDB error: "+e.message)}
+async function probeNet(){
+ try{await fetch("https://api.themoviedb.org/3/configuration");await fetch("https://image.tmdb.org/t/p/w92/",{mode:"no-cors"});if(ENV.blocked!==true)setBlocked(false)}
+ catch(e){setBlocked(true)}}
+document.addEventListener("securitypolicyviolation",e=>{if(/themoviedb\.org/.test(e.blockedURI)){setBlocked(true,e.violatedDirective+" ("+e.blockedURI.replace(/^(https?:\/\/[^\/]+).*/,"$1")+")")}});
+$("recheck").onclick=async()=>{ENV.blocked=null;ENV.csp="";await probeNet();refreshPosters()};
+function tmError(m){const e=$("tmerr");e.textContent=m;e.hidden=false}
+const norm=s=>(s||"").toLowerCase().normalize("NFKD").replace(/[^a-z0-9]/g,"");
+async function tmGet(path,params){
+ const px=$("tmproxy").value.trim().replace(/\/$/,""),key=getKey(),headers={};let qs=new URLSearchParams(params);
+ let base="https://api.themoviedb.org/3";
+ if(px)base=px;else if(/^eyJ/.test(key))headers.Authorization="Bearer "+key;else qs.set("api_key",key);
+ for(let a=0;a<3;a++){
+  const r=await fetch(base+path+"?"+qs,{headers});
+  if(r.status===429){await sleep(1000*(a+1));continue}
+  if(r.status===401||r.status===403)throw new Error("auth");
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return r.json()}
+ throw new Error("rate limited")}
+async function tmFind(title,year){
+ const y=+year||0,want=norm(title);
+ const best=(res,strict)=>{let top=null,ts=-1e9;
+  for(const r of res){const ry=+(r.release_date||"").slice(0,4),tm=norm(r.title)===want||norm(r.original_title)===want;
+   if(y&&ry&&Math.abs(ry-y)>1)continue;          // wrong year: never accept
+   if(strict&&!tm)continue;                       // loose searches must match the title exactly
+   const s=(tm?20:0)+(ry===y?10:0)+(r.poster_path?5:0)+Math.min(r.popularity||0,50)/50;
+   if(s>ts){ts=s;top=r}}return top};
+ const q=yr=>tmGet("/search/movie",{query:title,include_adult:"false",...(yr?{year:yr}:{})}).then(d=>d.results||[]);
+ let m=y?best(await q(y),false):null;
+ if(!m&&y)m=best([...(await q(y-1)),...(await q(y+1))],true);   // Letterboxd/TMDB year can differ by one
+ if(!m)m=best(await q(0),true);
+ return m?{p:m.poster_path||null,v:m.vote_count?m.vote_average:null,id:m.id}:null}
+const imgTest=url=>new Promise(res=>{const i=new Image();i.onload=()=>res({ok:1,w:i.naturalWidth,h:i.naturalHeight});i.onerror=()=>res({ok:0});i.src=url});
+const whyNet=e=>e.message==="auth"?"HTTP 401/403: key rejected":/Failed to fetch|NetworkError|Load failed/i.test(e.message)?"request BLOCKED before reaching the server (offline, ad-blocker/extension, or this page is inside a sandboxed preview that blocks external sites; open the .html file directly in Chrome/Firefox/Safari)":e.message;
+$("diagBtn").onclick=async()=>{
+ const d=$("diag"),L=s=>{d.textContent+=s+"\n"};d.hidden=false;d.textContent="";
+ L("Opened as: "+location.protocol+"//"+(location.host||"(local file)")+(window.top!==window?"  [inside an iframe/preview]":""));
+ let api=true,img=true;
+ try{await fetch("https://api.themoviedb.org/3/configuration")}catch(e){api=false}
+ try{await fetch("https://image.tmdb.org/t/p/w92/",{mode:"no-cors"})}catch(e){img=false}
+ L((api?"✓":"✗")+" TMDB API (api.themoviedb.org) "+(api?"reachable":"BLOCKED"));
+ L((img?"✓":"✗")+" TMDB images (image.tmdb.org) "+(img?"reachable":"BLOCKED"));
+ if(ENV.csp)L("  CSP says: "+ENV.csp);
+ if(!api||!img){setBlocked(true);L("\n→ This environment blocks TMDB. Open the file directly in Chrome (file://...) as described in the orange banner.");return}
+ setBlocked(false);
+ if(!tmOn()){L("\n– Network is open. Add your TMDB key above, then run this test again.");return}
+ for(const [t,y] of [["Parasite",2019],["The Godfather",1972],["Spirited Away",2001]]){
+  try{const m=await tmFind(t,y);
+   if(!m)L(`✗ ${t} (${y}): no TMDB match`);
+   else if(!m.p)L(`✗ ${t} (${y}): TMDB match has poster_path = null`);
+   else{const u="https://image.tmdb.org/t/p/w500"+m.p,r=await imgTest(u);L(`${r.ok?"✓":"✗"} ${t} (${y}): ${m.p} → ${r.ok?"image loaded "+r.w+"×"+r.h:"image request failed"}\n   ${u}`)}}
+  catch(e){L(`✗ ${t} (${y}): `+(e.message==="auth"?"key rejected (HTTP 401)":e.message))}}};
+function loadImg(pw,url,tries){
+ const im=pw.querySelector("img");tries=tries||0;pw.classList.add("ld");pw.classList.remove("bad");
+ im.onload=()=>{pw.classList.remove("ld");im.classList.add("ok");console.debug("[poster] loaded",url,im.naturalWidth+"x"+im.naturalHeight)};
+ im.onerror=()=>{if(tries<2){setTimeout(()=>loadImg(pw,url,tries+1),800*(tries+1))}else{console.warn("[poster] FAILED to load",url);if(ENV.blocked!==true)probeNet();pw.classList.remove("ld");im.classList.remove("ok");whyBad(pw,ENV.blocked===true?"Blocked by preview":"Image failed to load")}};
+ im.src=url}
+function whyBad(pw,why){pw.classList.remove("ld");pw.classList.add("bad");pw.querySelector(".ph").dataset.why=why}
+function showPoster(pw,c){
+ const u=posterUrl(c);
+ if(u)return loadImg(pw,u);
+ if(ENV.blocked===true)return whyBad(pw,"Blocked by preview");
+ if(!tmOn())return whyBad(pw,"Add a TMDB key");
+ if(TM.bad)return whyBad(pw,"TMDB key rejected");
+ if(c.tm&&!c.tm.p)return whyBad(pw,"No poster on TMDB");
+ if(c.tm===null)return whyBad(pw,"No TMDB match");
+ whyBad(pw,"TMDB request failed")}
+function getMeta(f){
+ const k=mk(f),c=cache[k]=cache[k]||{},jobs=[];
+  if(tmOn()&&c.tm===undefined&&!TM.fail[k]&&!TM.bad&&ENV.blocked!==true)jobs.push(inflight["t"+k]=inflight["t"+k]||lim(async()=>{
+  try{c.tm=await tmFind(f.title,f.year);saveCache()}catch(e){TM.fail[k]=1;tmFail(e)}
+  delete inflight["t"+k]}));
+ return Promise.all(jobs).then(()=>c)}
+const posterUrl=c=>c&&c.d?c.d:c&&c.tm&&typeof c.tm.p==="string"&&c.tm.p[0]==="/"?"https://image.tmdb.org/t/p/w500"+c.tm.p:"";
+function ratingHTML(c){let h="";
+ if(c.lb)h+=`<span class="st">${stars(c.lb)}</span> <span class="note">${c.lb.toFixed(2)}</span> `;
+ if(c.tm&&c.tm.v)h+=`<span class="tm">TMDB ${c.tm.v.toFixed(1)}</span>`;return h}
+
+function show(v){$("login").hidden=v!=="login";$("app").hidden=v==="login"}
+const openM=id=>$(id).hidden=false;
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>b.closest(".ov").hidden=true);
+document.querySelectorAll(".ov").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.hidden=true}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".ov").forEach(o=>o.hidden=true)});
+$("settings").onclick=()=>openM("connect");
+$("out").onclick=()=>{S.films=[];S.bag=[];$("grid").innerHTML="";$("main").hidden=true;$("result").hidden=true;$("connect").hidden=true;$("who").hidden=true;$("user").value=ls("lp_user");userMsg("");$("rssBtn").hidden=true;show("login")};
+function start(films){
+ S.films=films;S.bag=[];S.last=null;show("app");
+ $("main").hidden=true;$("load").hidden=false;
+ setTimeout(()=>{
+  $("count").innerHTML=`<b>${films.length.toLocaleString()}</b> film${films.length==1?"":"s"} `+(S.mode==="rss"?"from the recent diary":"on the Watchlist");
+  $("nokey").hidden=tmOn();
+  renderGrid();$("load").hidden=true;$("main").hidden=false},400)}
+
+let io;
+function renderGrid(){
+ const q=$("q").value.trim().toLowerCase(),s=$("sort").value;
+ const v=S.films.map((f,i)=>({f,i})).filter(x=>!q||x.f.title.toLowerCase().includes(q)||x.f.year===q);
+ v.sort({new:(a,b)=>a.i-b.i,old:(a,b)=>b.i-a.i,az:(a,b)=>a.f.title.localeCompare(b.f.title),yr:(a,b)=>(b.f.year||0)-(a.f.year||0)}[s]);
+ $("grid").innerHTML=v.length?v.map(({f,i})=>`<a class="card" href="${esc(f.uri)}" target="_blank" rel="noopener" data-i="${i}"><div class="pw"><img alt="${esc(f.title)} poster"><div class="ph">${esc(f.title)}</div></div><div class="ci"><b>${esc(f.title)}</b><span>${esc(f.year)}</span><div class="r"></div></div></a>`).join(""):`<p class="note" style="grid-column:1/-1;text-align:center">No films match “${esc(q)}”.</p>`;
+ io&&io.disconnect();
+ io=new IntersectionObserver(es=>es.forEach(en=>{if(!en.isIntersecting)return;io.unobserve(en.target);fillCard(en.target)}),{rootMargin:"500px"});
+ $("grid").querySelectorAll(".card").forEach(c=>io.observe(c))}
+async function fillCard(el){
+ const pw=el.querySelector(".pw");pw.classList.add("ld");
+ const c=await getMeta(S.films[el.dataset.i]);
+ showPoster(pw,c);
+ el.querySelector(".r").innerHTML=ratingHTML(c)}
+$("q").oninput=renderGrid;$("sort").onchange=renderGrid;
+
+let busy=false;
+async function pickRandom(){
+ if(busy||!S.films.length)return;busy=true;
+ try{
+  if(!S.bag.length)S.bag=makeBag(S.films.length,S.last);
+  const i=S.bag.pop();S.last=i;const f=S.films[i],body=$("resBody");
+  openM("result");
+  const meta=getMeta(f);
+  body.innerHTML=`<div class="shuf"><div class="pw"><img id="si"><div class="ph" id="st"></div></div></div><div><p class="note">Rolling the reel…</p><h2 id="sh">&nbsp;</h2></div>`;
+  const end=Date.now()+1700;
+  while(Date.now()<end){const r=S.films[rnd(S.films.length)],u=posterUrl(cache[mk(r)]),si=$("si");
+   if(!si)break;$("st").textContent=r.title;$("sh").textContent=r.title;
+   if(u){si.src=u;si.classList.add("ok")}else si.classList.remove("ok");await sleep(95)}
+  const c=await Promise.race([meta,sleep(4000).then(()=>cache[mk(f)]||{})]),big=posterUrl(c);
+  body.innerHTML=`<div class="rev"><div class="pw"><img alt="${esc(f.title)} poster"><div class="ph">${esc(f.title)}</div></div></div>
+  <div class="rev"><p class="note">Tonight's pick</p><h2>${esc(f.title)} ${f.year?`<span>${esc(f.year)}</span>`:""}</h2>
+  <div class="rating">${ratingHTML(c)||`<span class="note">${getKey()?"No rating available":"Add a TMDB key in Settings for ratings"}</span>`}</div>
+  ${f.watched?`<p class="note">Watched on ${esc(f.watched)}</p>`:""}
+  <div class="row"><a class="btn pri" href="${esc(f.uri)}" target="_blank" rel="noopener">View on Letterboxd ↗</a><button id="again">Pick Another Movie</button></div></div>`;
+  $("again").onclick=pickRandom;
+  showPoster(body.querySelector(".pw"),c);
+ }finally{busy=false}}
+$("rand").onclick=pickRandom;
+
+probeNet();
+
+/* ---------- username -> public Letterboxd data (no accounts, no backend) ---------- */
+const LB="https://letterboxd.com/";
+const DEFAULT_PROXY="https://aged-bar-0de6.cobsen00.workers.dev/?url={url}";   // your Cloudflare Worker; used unless a proxy is set in Settings
+const PROXIES=["https://corsproxy.io/?url={url}","https://api.allorigins.win/raw?url={url}","https://api.codetabs.com/v1/proxy/?quest={url}"];
+S.mode="watchlist";let lastUser="";
+const userMsg=(t,bad)=>{const e=$("userMsg");e.textContent=t||"";e.style.color=bad?"#ffb4a8":""};
+const prox=(t,u)=>t.includes("{url}")?t.replace("{url}",encodeURIComponent(u)):t+encodeURIComponent(u);
+const isChallenge=t=>/Just a moment|cf-chl|challenge-platform|Attention Required/i.test(t);
+const isNotFound=t=>/can.t find the page|Page not found|<title>[^<]*Not Found/i.test(t);
+const fail=(m,canRss)=>Object.assign(new Error(m),{canRss});
+async function lbFetch(path){   // own Worker first, free public proxies only as a fallback
+ const custom=$("proxy").value.trim(),list=custom?[custom]:[DEFAULT_PROXY,...PROXIES];let net=0,tried=0;
+ for(const t of list){tried++;
+  try{const r=await fetch(prox(t,LB+path),{cache:"no-store"}),text=await r.text();
+   if(r.status===404||(r.ok&&isNotFound(text)))return{status:404,text};
+   if(r.ok&&!isChallenge(text)&&text.length>200)return{status:200,text};
+  }catch(e){net++}}
+ if(net===tried)throw fail("Couldn't reach the proxy service. Check your internet connection. If you're viewing this inside a restricted preview, open the page in a normal browser tab.",false);
+ throw fail("Letterboxd (or the free proxy) refused the request. Letterboxd's bot protection may be blocking the proxy. Try again in a moment.",true)}
+function parseUser(v){v=v.trim();const m=v.match(/letterboxd\.com\/([^\/?#\s]+)/i);if(m)v=m[1];v=v.replace(/^@/,"");return /^[A-Za-z0-9_]{2,15}$/.test(v)?v:""}
+const notFound=u=>fail(`No Letterboxd user named “${u}”. Check the spelling.`,false);
+function parseWatchlist(html){
+ const d=new DOMParser().parseFromString(html,"text/html"),seen=new Set(),films=[];
+ d.querySelectorAll("[data-item-slug],[data-film-slug]").forEach(el=>{
+  const slug=el.dataset.itemSlug||el.dataset.filmSlug;if(!slug||seen.has(slug))return;seen.add(slug);
+  let name=el.dataset.itemName||el.dataset.filmName||(el.querySelector("img")&&el.querySelector("img").alt)||slug,year=el.dataset.filmReleaseYear||"";
+  const m=name.match(/^(.*?)\s*\((\d{4})\)$/);if(m){name=m[1];year=year||m[2]}
+  films.push({title:name,year,uri:LB+"film/"+slug+"/",added:""})});
+ return films}
+async function loadWatchlist(u,progress){
+ const all=[],seen=new Set();S.warn="";
+ for(let p=1;p<=200;p++){
+  let r;
+  try{r=await lbFetch(`${encodeURIComponent(u)}/watchlist/${p>1?"page/"+p+"/":""}`)}
+  catch(e){if(p===1)throw e;S.warn=`Stopped at page ${p} (${e.message.split(".")[0]}). Showing the ${all.length} films loaded so far.`;break}
+  if(r.status===404){if(p===1)throw notFound(u);break}
+  const fresh=parseWatchlist(r.text).filter(f=>!seen.has(f.uri));
+  if(!fresh.length){if(p===1)throw fail(`No films found on @${u}'s watchlist page. It may be empty or private, or Letterboxd changed its layout.`,true);break}
+  fresh.forEach(f=>{seen.add(f.uri);all.push(f)});progress(p,all.length);
+  await sleep(300)}                                   // be polite: one page at a time
+ return all}
+async function loadRss(u){
+ const r=await lbFetch(encodeURIComponent(u)+"/rss/");if(r.status===404)throw notFound(u);
+ const d=new DOMParser().parseFromString(r.text,"application/xml");
+ if(d.querySelector("parsererror")||!d.querySelector("rss"))throw fail("Letterboxd didn't return an RSS feed for this profile.",false);
+ const seen=new Set(),films=[];
+ d.querySelectorAll("item").forEach(it=>{const g=n=>{const e=it.getElementsByTagName(n)[0];return e?e.textContent.trim():""};
+  const t=g("letterboxd:filmTitle");if(!t)return;                     // skips lists
+  const slug=(g("link").match(/\/film\/([^\/]+)/)||[])[1],k=slug||t+g("letterboxd:filmYear");if(seen.has(k))return;seen.add(k);
+  films.push({title:t,year:g("letterboxd:filmYear"),uri:slug?LB+"film/"+slug+"/":g("link"),added:"",watched:g("letterboxd:watchedDate")})});
+ if(!films.length)throw fail("The public RSS feed has no diary entries yet.",false);
+ return films}
+
+async function run(u,mode){
+ lastUser=u;userMsg("");$("rssBtn").hidden=true;$("goBtn").disabled=true;
+ show("app");$("main").hidden=true;$("load").hidden=false;$("loadTxt").textContent=mode==="rss"?"Reading the recent diary…":"Reading @"+u+"'s watchlist…";
+ try{
+  const films=mode==="rss"?await loadRss(u):await loadWatchlist(u,(p,n)=>{$("loadTxt").textContent=`Reading page ${p} · ${n} films so far…`});
+  S.mode=mode;$("who").hidden=false;$("who").textContent=(mode==="rss"?"Diary of @":"@")+u;
+  const note=$("modeNote");const t=[mode==="rss"?"Showing the ~50 most recent diary entries from RSS. This is not the Watchlist (Letterboxd's RSS feed doesn't include it).":"",S.warn].filter(Boolean).join(" ");
+  note.hidden=!t;note.textContent=t;$("empty").hidden=true;$("rand").disabled=false;start(films);
+ }catch(e){show("login");$("load").hidden=true;userMsg(e.message,true);$("rssBtn").hidden=!(mode==="watchlist"&&e.canRss)}
+ $("goBtn").disabled=false}
+$("userForm").onsubmit=e=>{e.preventDefault();const u=parseUser($("user").value);
+ if(!u)return userMsg("Enter a Letterboxd username: 2–15 letters, numbers or underscores (for example D4OUD).",true);
+ ls("lp_user",u);run(u,"watchlist")};
+$("rssBtn").onclick=()=>run(lastUser,"rss");
+$("user").value=ls("lp_user");
+{const q=new URLSearchParams(location.search).get("user");if(q){$("user").value=q;$("userForm").requestSubmit()}}
+</script>
+</body></html>
